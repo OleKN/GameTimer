@@ -75,12 +75,12 @@ class Player {
 
   Player(this.name, {required this.notifyParent}) {
     var rng = Random();
-    timer = PausableTimer(Duration(milliseconds: 10), handleTimeout);
+    timer = PausableTimer(Duration(seconds: 1), handleTimeout);
     setBgColor(Color.fromARGB(255, rng.nextInt(255), rng.nextInt(255), rng.nextInt(255)));
   }
 
   void handleTimeout() {
-    countDown = countDown - 0.01;
+    countDown = countDown - 1;
     if (countDown > 0) {
       // we know the callback won't be called before the constructor ends, so
       // it is safe to use !
@@ -103,20 +103,14 @@ class Player {
     int flooredValue = countDown.floor();
     int minutes = (flooredValue / 60).floor();
     int seconds = flooredValue - minutes * 60;
-    double decimalValue = countDown - flooredValue;
     String minuteString = minutes.toString();
     String secondString = getSecondsString(seconds);
-    String decimalString = getDecimalString(decimalValue);
 
-    return '$minuteString:$secondString.$decimalString';
+    return '$minuteString:$secondString';
   }
 
   String getSecondsString(int secondsValue) {
     return secondsValue.toString().padLeft(2, '0');
-  }
-
-  String getDecimalString(double decimalValue) {
-    return '${(decimalValue * 100).toInt()}'.padLeft(2, '0');
   }
 }
 

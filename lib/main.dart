@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:pausable_timer/pausable_timer.dart';
+import 'package:wakelock/wakelock.dart';
 
 void main() {
   runApp(const MyApp());
@@ -120,6 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var _gameIsRunning = false;
   var _gameHasStarted = false;
   int _index = 0;
+  var clockTime = 120.0;
 
   CarouselController buttonCarouselController = CarouselController();
   TextEditingController _textFieldController = TextEditingController();
@@ -186,25 +189,31 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           borderRadius: BorderRadius.circular(75),
         ),
+        padding: EdgeInsets.all(30),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            FractionallySizedBox(
-              alignment: Alignment.topCenter,
-              widthFactor: 0.5,
-              child: Container(
-                  padding: EdgeInsets.all(20),
-                  child: FittedBox(
-                    alignment: Alignment.topCenter,
-                    fit: BoxFit.fitWidth,
-                    child: Text(
-                        player.name,
-                      style: Theme.of(context).textTheme.bodyText1?.copyWith(
-                        color: player.textColor
-                      ),
-                    )
-                    ,
-                  )),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(child: Container()),
+                AutoSizeText(
+                  player.name,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  style: Theme.of(context).textTheme.bodyText1?.copyWith(
+                      color: player.textColor,
+                    fontSize: 200
+                  ),
+                ),
+                Expanded(child: Container()),
+                Expanded(child: Container()),
+                Expanded(child: Container()),
+                Expanded(child: Container()),
+                Expanded(child: Container()),
+                Expanded(child: Container()),
+              ],
             ),
             FittedBox(
               alignment: Alignment.center,
@@ -256,7 +265,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () {
                     addPlayer();
                     Navigator.of(context).pop();
-                  })
+                  }),
+              TextButton(
+                  child: Text('Reset'),
+                  onPressed: () {
+                    resetGame();
+                    Navigator.of(context).pop();
+                  }),
             ],
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -284,6 +299,13 @@ class _MyHomePageState extends State<MyHomePage> {
     _gameIsRunning = !_gameIsRunning;
     handleTimers(!_gameHasStarted);
     _gameHasStarted = true;
+
+    if(_gameIsRunning){
+      Wakelock.enable();
+    } else{
+      Wakelock.disable();
+    }
+
     refresh();
   }
 
@@ -302,6 +324,16 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       //buttonCarouselController.animateToPage(players.length-1);
     });
+  }
+
+  resetGame(){
+    _gameIsRunning = false;
+    players.forEach((element) {
+      element.timer.pause();
+      element.countDown = clockTime;
+    });
+
+    refresh();
   }
 
   handleTimers(bool addIncrements) {

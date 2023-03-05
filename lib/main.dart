@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:pausable_timer/pausable_timer.dart';
 
 void main() {
@@ -65,6 +66,7 @@ class Player {
   void setBgColor(Color color){
     bgColor = color;
     textColor = color.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+    notifyParent();
   }
 
   Player(this.name, {required this.notifyParent}) {
@@ -257,7 +259,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   })
             ],
             content: Column(
-
               mainAxisSize: MainAxisSize.min,
                 children: [ TextField(
                     onChanged: (value) {
@@ -267,6 +268,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     controller: _textFieldController,
                     decoration:
                         InputDecoration(hintText: "Text Field in Dialog"),
+                  ),
+                  ColorPicker(
+                    pickerColor: editingPlayer.bgColor,
+                    onColorChanged: editingPlayer.setBgColor,
                   ),
                 ],
             ),

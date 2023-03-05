@@ -52,22 +52,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class Player{
-  var countDown = 1200;
-  var increment = 50;
+  var countDown = 120.0;
+  var increment = 5.0;
   final Function() notifyParent;
   late PausableTimer timer;
   var name = "Player 1";
-  // var timeLeft = 120;
-  // var timeRunning = false;
 
   Player({required this.notifyParent}){
     print("Hello");
-    timer = PausableTimer(Duration(milliseconds: 100), handleTimeout);
+    timer = PausableTimer(Duration(milliseconds: 10), handleTimeout);
     //timer.start();
   }
 
   void handleTimeout(){
-    countDown--;
+    countDown = countDown - 0.01;
     if (countDown > 0) {
       // we know the callback won't be called before the constructor ends, so
       // it is safe to use !
@@ -84,10 +82,32 @@ class Player{
       countDown += increment;
     }
   }
+
+  String formattedTime() {
+    if (countDown < 0) return 'Outatime';
+    int flooredValue = countDown.floor();
+    int minutes = (flooredValue / 60).floor();
+    int seconds = flooredValue - minutes * 60;
+    double decimalValue = countDown - flooredValue;
+    String minuteString = minutes.toString();
+    String secondString = getSecondsString(seconds);
+    String decimalString = getDecimalString(decimalValue);
+
+    return '$minuteString:$secondString.$decimalString';
+  }
+  
+  String getSecondsString(int secondsValue) {
+    return secondsValue.toString().padLeft(2, '0');
+  }
+
+  String getDecimalString(double decimalValue) {
+    return '${(decimalValue * 100).toInt()}'.padLeft(2, '0');
+  }
+
+
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   var _gameIsRunning = false;
   var _gameHasStarted = false;
   int _index = 0;
@@ -99,22 +119,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   late List<Player> players = [
     Player(notifyParent: refresh),
-    Player(notifyParent: refresh),
-    Player(notifyParent: refresh),
-    Player(notifyParent: refresh),
     Player(notifyParent: refresh)
   ];
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,17 +131,15 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: CarouselSlider(
           carouselController: buttonCarouselController,
-          options: CarouselOptions(height: 400.0, onPageChanged: onNextPlayer),
+          options: CarouselOptions(onPageChanged: onNextPlayer,
+            height: MediaQuery.of(context).size.height,
+            enlargeCenterPage: true,),
           items: players.map((i) {
             return Builder(
               builder: (BuildContext context) {
@@ -149,18 +153,28 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: startPauseGame,
         tooltip: 'start',
         child: _gameIsRunning ? const Icon(Icons.pause) : const Icon(Icons.play_arrow),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ), // This trailing comma makes auto-formatting nicer for build methods.flutter
     );
   }
 
   Widget getContainer(Player player){
     return Container(
-      width: MediaQuery.of(context).size.width,
-      margin: EdgeInsets.symmetric(horizontal: 5.0),
-      decoration: BoxDecoration(
-          color: Colors.red
+        width: MediaQuery.of(context).size.width,
+        margin: EdgeInsets.symmetric(horizontal: 0.0, vertical: 50),
+        decoration: BoxDecoration(
+          color: Colors.grey,
+          border: Border.all(
+            color: Colors.grey,
+            width: 8,
+          ),
+          borderRadius: BorderRadius.circular(75),
+        ),
+        child: Center(
+          child: Text(
+            player.formattedTime(),
+            style: TextStyle(fontSize: 16.0),
+          ),
       ),
-      child: Text(player.countDown.toString(), style: TextStyle(fontSize: 16.0),)
     );
   }
   

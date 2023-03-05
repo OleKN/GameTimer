@@ -1,4 +1,8 @@
+import 'dart:async';
+
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:pausable_timer/pausable_timer.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,8 +51,59 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+class Player{
+  var countDown = 1200;
+  var increment = 50;
+  final Function() notifyParent;
+  late PausableTimer timer;
+  var name = "Player 1";
+  // var timeLeft = 120;
+  // var timeRunning = false;
+
+  Player({required this.notifyParent}){
+    print("Hello");
+    timer = PausableTimer(Duration(milliseconds: 100), handleTimeout);
+    //timer.start();
+  }
+
+  void handleTimeout(){
+    countDown--;
+    if (countDown > 0) {
+      // we know the callback won't be called before the constructor ends, so
+      // it is safe to use !
+      timer
+        ..reset()
+        ..start();
+    }
+    notifyParent();
+  }
+
+  void startTurn(bool addIncrement){
+    timer.start();
+    if(addIncrement) {
+      countDown += increment;
+    }
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  var _gameIsRunning = false;
+  var _gameHasStarted = false;
+  int _index = 0;
+  CarouselController buttonCarouselController = CarouselController();
+
+  refresh(){
+    setState(() {});
+  }
+
+  late List<Player> players = [
+    Player(notifyParent: refresh),
+    Player(notifyParent: refresh),
+    Player(notifyParent: refresh),
+    Player(notifyParent: refresh),
+    Player(notifyParent: refresh)
+  ];
 
   void _incrementCounter() {
     setState(() {
@@ -78,38 +133,55 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        child: CarouselSlider(
+          carouselController: buttonCarouselController,
+          options: CarouselOptions(height: 400.0, onPageChanged: onNextPlayer),
+          items: players.map((i) {
+            return Builder(
+              builder: (BuildContext context) {
+                return getContainer(i);
+              },
+            );
+          }).toList(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        onPressed: startPauseGame,
+        tooltip: 'start',
+        child: _gameIsRunning ? const Icon(Icons.pause) : const Icon(Icons.play_arrow),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Widget getContainer(Player player){
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      margin: EdgeInsets.symmetric(horizontal: 5.0),
+      decoration: BoxDecoration(
+          color: Colors.red
+      ),
+      child: Text(player.countDown.toString(), style: TextStyle(fontSize: 16.0),)
+    );
+  }
+  
+  startPauseGame(){
+    _gameIsRunning = !_gameIsRunning;
+    handleTimers(!_gameHasStarted);
+    _gameHasStarted = true;
+    refresh();
+  }
+
+  onNextPlayer(int index, CarouselPageChangedReason reason){
+    _index = index;
+    handleTimers(true);
+  }
+
+  handleTimers(bool addIncrements){
+    players.forEach((element) {
+      element.timer.pause();
+    });
+    if(_gameIsRunning) {
+      players[_index].startTurn(addIncrements);
+    }
   }
 }

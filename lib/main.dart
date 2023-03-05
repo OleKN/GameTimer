@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pausable_timer/pausable_timer.dart';
 
@@ -169,15 +170,31 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           borderRadius: BorderRadius.circular(75),
         ),
-        child: Center(
-          child: Text(
-            player.formattedTime(),
-            style: TextStyle(fontSize: 16.0),
-          ),
-      ),
+        child:
+            Stack(
+              fit: StackFit.expand,
+              children: [
+                FittedBox(
+                  alignment: Alignment.topCenter,
+                  fit: BoxFit.fitWidth,
+                  child: Container(child:Text(
+                    player.name
+                  ),
+                  ),
+                ),
+                FittedBox(
+                  alignment: Alignment.center,
+                  fit: BoxFit.fitWidth,
+                  child: Text(
+                    player.formattedTime(),
+                  ),
+                ),
+              ],
+            )
+
     );
   }
-  
+
   startPauseGame(){
     _gameIsRunning = !_gameIsRunning;
     handleTimers(!_gameHasStarted);

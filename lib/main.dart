@@ -111,6 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var _gameHasStarted = false;
   int _index = 0;
   CarouselController buttonCarouselController = CarouselController();
+  TextEditingController _textFieldController = TextEditingController();
 
   refresh() {
     setState(() {});
@@ -133,20 +134,23 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: CarouselSlider(
-          carouselController: buttonCarouselController,
-          options: CarouselOptions(
-            onPageChanged: onNextPlayer,
-            height: MediaQuery.of(context).size.height,
-            enlargeCenterPage: true,
+        child: GestureDetector(
+          onTap: editPlayer,
+          child: CarouselSlider(
+            carouselController: buttonCarouselController,
+            options: CarouselOptions(
+              onPageChanged: onNextPlayer,
+              height: MediaQuery.of(context).size.height,
+              enlargeCenterPage: true,
+            ),
+            items: players.map((i) {
+              return Builder(
+                builder: (BuildContext context) {
+                  return getContainer(i);
+                },
+              );
+            }).toList(),
           ),
-          items: players.map((i) {
-            return Builder(
-              builder: (BuildContext context) {
-                return getContainer(i);
-              },
-            );
-          }).toList(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -194,6 +198,34 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ));
+  }
+
+  editPlayer(){
+    if(!_gameIsRunning){
+      _displayTextInputDialog(context);
+    }
+  }
+
+  Future<void> _displayTextInputDialog(BuildContext context) async {
+    Player editingPlayer = players[_index];
+    _textFieldController.text = editingPlayer.name;
+
+
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('TextField in Dialog'),
+            content: TextField(
+              onChanged: (value) {
+                editingPlayer.name = value;
+                refresh();
+              },
+              controller: _textFieldController,
+              decoration: InputDecoration(hintText: "Text Field in Dialog"),
+            ),
+          );
+        });
   }
 
   startPauseGame() {

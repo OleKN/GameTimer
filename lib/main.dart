@@ -52,20 +52,20 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class Player{
+class Player {
   var countDown = 120.0;
   var increment = 5.0;
   final Function() notifyParent;
   late PausableTimer timer;
   var name = "Player 1";
 
-  Player({required this.notifyParent}){
+  Player({required this.notifyParent}) {
     print("Hello");
     timer = PausableTimer(Duration(milliseconds: 10), handleTimeout);
     //timer.start();
   }
 
-  void handleTimeout(){
+  void handleTimeout() {
     countDown = countDown - 0.01;
     if (countDown > 0) {
       // we know the callback won't be called before the constructor ends, so
@@ -77,9 +77,9 @@ class Player{
     notifyParent();
   }
 
-  void startTurn(bool addIncrement){
+  void startTurn(bool addIncrement) {
     timer.start();
-    if(addIncrement) {
+    if (addIncrement) {
       countDown += increment;
     }
   }
@@ -96,7 +96,7 @@ class Player{
 
     return '$minuteString:$secondString.$decimalString';
   }
-  
+
   String getSecondsString(int secondsValue) {
     return secondsValue.toString().padLeft(2, '0');
   }
@@ -104,8 +104,6 @@ class Player{
   String getDecimalString(double decimalValue) {
     return '${(decimalValue * 100).toInt()}'.padLeft(2, '0');
   }
-
-
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -114,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _index = 0;
   CarouselController buttonCarouselController = CarouselController();
 
-  refresh(){
+  refresh() {
     setState(() {});
   }
 
@@ -132,15 +130,16 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: CarouselSlider(
           carouselController: buttonCarouselController,
-          options: CarouselOptions(onPageChanged: onNextPlayer,
+          options: CarouselOptions(
+            onPageChanged: onNextPlayer,
             height: MediaQuery.of(context).size.height,
-            enlargeCenterPage: true,),
+            enlargeCenterPage: true,
+          ),
           items: players.map((i) {
             return Builder(
               builder: (BuildContext context) {
@@ -153,12 +152,14 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: startPauseGame,
         tooltip: 'start',
-        child: _gameIsRunning ? const Icon(Icons.pause) : const Icon(Icons.play_arrow),
+        child: _gameIsRunning
+            ? const Icon(Icons.pause)
+            : const Icon(Icons.play_arrow),
       ), // This trailing comma makes auto-formatting nicer for build methods.flutter
     );
   }
 
-  Widget getContainer(Player player){
+  Widget getContainer(Player player) {
     return Container(
         width: MediaQuery.of(context).size.width,
         margin: EdgeInsets.symmetric(horizontal: 0.0, vertical: 50),
@@ -170,48 +171,48 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           borderRadius: BorderRadius.circular(75),
         ),
-        child:
-            Stack(
-              fit: StackFit.expand,
-              children: [
-                FittedBox(
-                  alignment: Alignment.topCenter,
-                  fit: BoxFit.fitWidth,
-                  child: Container(child:Text(
-                    player.name
-                  ),
-                  ),
-                ),
-                FittedBox(
-                  alignment: Alignment.center,
-                  fit: BoxFit.fitWidth,
-                  child: Text(
-                    player.formattedTime(),
-                  ),
-                ),
-              ],
-            )
-
-    );
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            FractionallySizedBox(
+              alignment: Alignment.topCenter,
+              widthFactor: 0.5,
+              child: Container(
+                  padding: EdgeInsets.all(20),
+                  child: FittedBox(
+                    alignment: Alignment.topCenter,
+                    fit: BoxFit.fitWidth,
+                    child: Text(player.name),
+                  )),
+            ),
+            FittedBox(
+              alignment: Alignment.center,
+              fit: BoxFit.fitWidth,
+              child: Text(
+                player.formattedTime(),
+              ),
+            ),
+          ],
+        ));
   }
 
-  startPauseGame(){
+  startPauseGame() {
     _gameIsRunning = !_gameIsRunning;
     handleTimers(!_gameHasStarted);
     _gameHasStarted = true;
     refresh();
   }
 
-  onNextPlayer(int index, CarouselPageChangedReason reason){
+  onNextPlayer(int index, CarouselPageChangedReason reason) {
     _index = index;
     handleTimers(true);
   }
 
-  handleTimers(bool addIncrements){
+  handleTimers(bool addIncrements) {
     players.forEach((element) {
       element.timer.pause();
     });
-    if(_gameIsRunning) {
+    if (_gameIsRunning) {
       players[_index].startTurn(addIncrements);
     }
   }

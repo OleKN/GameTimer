@@ -258,7 +258,8 @@ class _MyHomePageState extends State<MyHomePage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text('Player Name'),
+            scrollable: true,
+            title: Text('Edit Player/Game'),
             actions: [
               TextButton(
                   child: Text('Delete'),

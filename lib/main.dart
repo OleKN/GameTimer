@@ -57,12 +57,20 @@ class Player {
   var increment = 5.0;
   final Function() notifyParent;
   late PausableTimer timer;
-  var name = "Player 1";
+  var name = "Player";
+  Color bgColor = Colors.red;
+  Color textColor = Colors.green;
 
-  Player({required this.notifyParent}) {
+
+  void setBgColor(Color color){
+    bgColor = color;
+    textColor = color.computeLuminance() < 0.5 ? Colors.white : Colors.black;
+  }
+
+  Player(this.name, {required this.notifyParent}) {
     print("Hello");
     timer = PausableTimer(Duration(milliseconds: 10), handleTimeout);
-    //timer.start();
+    setBgColor(Colors.green);
   }
 
   void handleTimeout() {
@@ -110,6 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var _gameIsRunning = false;
   var _gameHasStarted = false;
   int _index = 0;
+
   CarouselController buttonCarouselController = CarouselController();
   TextEditingController _textFieldController = TextEditingController();
 
@@ -118,8 +127,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   late List<Player> players = [
-    Player(notifyParent: refresh),
-    Player(notifyParent: refresh)
+    Player("Player 1", notifyParent: refresh),
+    Player("Player 2", notifyParent: refresh)
   ];
 
   @override
@@ -168,9 +177,9 @@ class _MyHomePageState extends State<MyHomePage> {
         width: MediaQuery.of(context).size.width,
         margin: EdgeInsets.symmetric(horizontal: 0.0, vertical: 50),
         decoration: BoxDecoration(
-          color: Colors.grey,
+          color: player.bgColor,
           border: Border.all(
-            color: Colors.grey,
+            color: player.bgColor,
             width: 8,
           ),
           borderRadius: BorderRadius.circular(75),
@@ -186,7 +195,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: FittedBox(
                     alignment: Alignment.topCenter,
                     fit: BoxFit.fitWidth,
-                    child: Text(player.name),
+                    child: Text(
+                        player.name,
+                      style: Theme.of(context).textTheme.bodyText1?.copyWith(
+                        color: player.textColor
+                      ),
+                    )
+                    ,
                   )),
             ),
             FittedBox(
@@ -194,6 +209,9 @@ class _MyHomePageState extends State<MyHomePage> {
               fit: BoxFit.fitWidth,
               child: Text(
                 player.formattedTime(),
+                style: Theme.of(context).textTheme.bodyText1?.copyWith(
+                    color: player.textColor
+                ),
               ),
             ),
           ],
@@ -275,7 +293,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   addPlayer() {
-    players.add(Player(notifyParent: refresh));
+    players.add(Player("Player " + (players.length + 1).toString(), notifyParent: refresh));
     setState(() {
       //buttonCarouselController.animateToPage(players.length-1);
     });

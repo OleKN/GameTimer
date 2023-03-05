@@ -318,6 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   const SizedBox(height: 20),
                   ColorPicker(
+                    enableAlpha: false,
                     pickerColor: editingPlayer.bgColor,
                     onColorChanged: editingPlayer.setBgColor,
                   ),

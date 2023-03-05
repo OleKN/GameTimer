@@ -259,6 +259,7 @@ class _MyHomePageState extends State<MyHomePage> {
   onNextPlayer(int index, CarouselPageChangedReason reason) {
     _index = index;
     handleTimers(true);
+    print("currently on player $index");
   }
 
   deleteCurrentPlayer() {
@@ -269,7 +270,8 @@ class _MyHomePageState extends State<MyHomePage> {
   addPlayer() {
     players.add(Player(notifyParent: refresh));
     refresh();
-    buttonCarouselController.animateToPage(players.length);
+    buttonCarouselController.animateToPage(players.length - 1);
+    _index = players.length - 1;
   }
 
   handleTimers(bool addIncrements) {

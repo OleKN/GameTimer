@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:pausable_timer/pausable_timer.dart';
 import 'package:wakelock/wakelock.dart';
@@ -72,9 +74,9 @@ class Player {
   }
 
   Player(this.name, {required this.notifyParent}) {
-    print("Hello");
+    var rng = Random();
     timer = PausableTimer(Duration(milliseconds: 10), handleTimeout);
-    setBgColor(Colors.green);
+    setBgColor(Color.fromARGB(255, rng.nextInt(255), rng.nextInt(255), rng.nextInt(255)));
   }
 
   void handleTimeout() {
@@ -122,10 +124,13 @@ class _MyHomePageState extends State<MyHomePage> {
   var _gameIsRunning = false;
   var _gameHasStarted = false;
   int _index = 0;
-  var clockTime = 120.0;
+  var startTime = 120.0;
+  var increment = 5.0;
 
   CarouselController buttonCarouselController = CarouselController();
-  TextEditingController _textFieldController = TextEditingController();
+  final TextEditingController _textFieldController = TextEditingController();
+  final TextEditingController _timeFieldController = TextEditingController();
+  final TextEditingController _incrementFieldController = TextEditingController();
 
   refresh() {
     setState(() {});
@@ -246,7 +251,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _displayTextInputDialog(BuildContext context) async {
     Player editingPlayer = players[_index];
     _textFieldController.text = editingPlayer.name;
-
+    _timeFieldController.text = startTime.toString();
+    _incrementFieldController.text = increment.toString();
 
     return showDialog(
         context: context,
@@ -275,15 +281,42 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
             content: Column(
               mainAxisSize: MainAxisSize.min,
-                children: [ TextField(
+                children: [
+                  const Text("Player Name"),
+                  TextField(
                     onChanged: (value) {
                       editingPlayer.name = value;
                       refresh();
                     },
                     controller: _textFieldController,
-                    decoration:
-                        InputDecoration(hintText: "Text Field in Dialog"),
                   ),
+                  const SizedBox(height: 20),
+                  const Text("Time per player (seconds)"),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      startTime = double.parse(value);
+                      resetGame();
+                    },
+                    controller: _timeFieldController,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text("Increment per player (seconds)"),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      increment = double.parse(value);
+                      resetGame();
+                    },
+                    controller: _incrementFieldController,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                   ColorPicker(
                     pickerColor: editingPlayer.bgColor,
                     onColorChanged: editingPlayer.setBgColor,
@@ -330,7 +363,8 @@ class _MyHomePageState extends State<MyHomePage> {
     _gameIsRunning = false;
     players.forEach((element) {
       element.timer.pause();
-      element.countDown = clockTime;
+      element.countDown = startTime;
+      element.increment = increment;
     });
 
     refresh();

@@ -135,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: GestureDetector(
-          onTap: editPlayer,
+          onTap: tapCard,
           child: CarouselSlider(
             carouselController: buttonCarouselController,
             options: CarouselOptions(
@@ -200,6 +200,14 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
   }
 
+  tapCard(){
+    if(_gameIsRunning){
+      buttonCarouselController.nextPage();
+    } else{
+      editPlayer();
+    }
+  }
+  
   editPlayer() {
     if (!_gameIsRunning) {
       _displayTextInputDialog(context);
@@ -259,7 +267,6 @@ class _MyHomePageState extends State<MyHomePage> {
   onNextPlayer(int index, CarouselPageChangedReason reason) {
     _index = index;
     handleTimers(true);
-    print("currently on player $index");
   }
 
   deleteCurrentPlayer() {
@@ -269,9 +276,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   addPlayer() {
     players.add(Player(notifyParent: refresh));
-    refresh();
-    buttonCarouselController.animateToPage(players.length - 1);
-    _index = players.length - 1;
+    setState(() {
+      //buttonCarouselController.animateToPage(players.length-1);
+    });
   }
 
   handleTimers(bool addIncrements) {

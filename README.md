@@ -1,3 +1,0 @@
-# gametimer
-
-Flutter testproject

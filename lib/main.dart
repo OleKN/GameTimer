@@ -200,8 +200,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
   }
 
-  editPlayer(){
-    if(!_gameIsRunning){
+  editPlayer() {
+    if (!_gameIsRunning) {
       _displayTextInputDialog(context);
     }
   }
@@ -215,16 +215,37 @@ class _MyHomePageState extends State<MyHomePage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text('TextField in Dialog'),
-            content: TextField(
-              onChanged: (value) {
-                editingPlayer.name = value;
-                refresh();
-              },
-              controller: _textFieldController,
-              decoration: InputDecoration(hintText: "Text Field in Dialog"),
+            title: Text('Player Name'),
+            actions: [
+              TextButton(
+                  child: Text('Delete'),
+                  onPressed: players.length < 2 ? null : () {
+                    deleteCurrentPlayer();
+                    Navigator.of(context).pop();
+                  }),
+              TextButton(
+                  child: Text('Add'),
+                  onPressed: () {
+                    addPlayer();
+                    Navigator.of(context).pop();
+                  })
+            ],
+            content: Column(
+
+              mainAxisSize: MainAxisSize.min,
+                children: [ TextField(
+                    onChanged: (value) {
+                      editingPlayer.name = value;
+                      refresh();
+                    },
+                    controller: _textFieldController,
+                    decoration:
+                        InputDecoration(hintText: "Text Field in Dialog"),
+                  ),
+                ],
             ),
           );
+
         });
   }
 
@@ -238,6 +259,17 @@ class _MyHomePageState extends State<MyHomePage> {
   onNextPlayer(int index, CarouselPageChangedReason reason) {
     _index = index;
     handleTimers(true);
+  }
+
+  deleteCurrentPlayer() {
+    players.removeAt(_index);
+    refresh();
+  }
+
+  addPlayer() {
+    players.add(Player(notifyParent: refresh));
+    refresh();
+    buttonCarouselController.animateToPage(players.length);
   }
 
   handleTimers(bool addIncrements) {
